@@ -1,0 +1,1 @@
+Lee `.axet-code/skills/azure-devops-cicd/SKILL.md` y sigue la referencia `references/ado-configurar-workflow.md`. Usa el perfil `.axet-code/skills/azure-devops-cicd/config/ado-projects.json` del workspace si existe. Verifica solo lectura y presenta una vista previa; pide confirmación antes de modificar el catálogo. No leas ni muestres el PAT ni realices cambios remotos.

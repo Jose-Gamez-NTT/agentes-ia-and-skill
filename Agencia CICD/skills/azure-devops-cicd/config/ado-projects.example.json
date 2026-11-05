@@ -1,0 +1,19 @@
+{
+  "$schema": "./ado-projects.schema.json",
+  "organizations": [
+    {
+      "id": "mi-organizacion",
+      "name": "Mi organización",
+      "url": "https://dev.azure.com/MI_ORGANIZACION",
+      "projects": [
+        {
+          "id": "id-o-nombre-exacto-del-proyecto",
+          "name": "Nombre exacto del proyecto",
+          "repositories": [],
+          "pipelines": [],
+          "libraries": []
+        }
+      ]
+    }
+  ]
+}

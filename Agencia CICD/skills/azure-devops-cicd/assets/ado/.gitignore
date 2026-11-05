@@ -1,0 +1,6 @@
+# Credenciales locales de Azure DevOps
+.env
+
+# Exports/backups pueden incluir valores no secretos y metadatos internos
+backups/
+libraries/

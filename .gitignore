@@ -1,0 +1,7 @@
+# Configuración local de Azure DevOps; nunca versionar
+.env
+**/.env
+**/ado-projects.json
+**/ado-projects.local.json
+**/backups/
+**/libraries/
