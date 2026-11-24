@@ -33,7 +33,13 @@ Para desinstalar el agente, la skill, el comando y todo el runtime instalado en 
 & "$package\scripts\install-analista-db2.ps1" -Action Uninstall -Workspace $workspace
 ```
 
-La desinstalación elimina completa la carpeta de la skill instalada, incluidos archivos modificados o generados localmente; guarda antes cualquier configuración, driver o dato que quieras conservar. No elimina el paquete fuente ni desinstala Java/Maven. Comprueba procesos Java/Maven que usen esa carpeta y aborta si detecta alguno: detén el servidor con `Ctrl+C` y vuelve a ejecutar. Si Windows bloquea algún archivo, la operación falla con la ruta/error en vez de informar éxito. El agente y el comando se retiran solo si coinciden con los archivos fuente (por hash); un archivo local modificado en esas rutas se conserva.
+La desinstalación elimina y verifica la carpeta completa de la skill instalada y su runtime, incluso si falta `SKILL.md`, incluidos archivos modificados o generados localmente; guarda antes cualquier configuración, driver o dato que quieras conservar. No elimina el paquete fuente, los drivers fuera de la carpeta instalada ni desinstala Java/Maven. Comprueba procesos Java/Maven que usen esa carpeta y aborta si detecta alguno: detén el servidor con `Ctrl+C` y vuelve a ejecutar. Si Windows bloquea algún archivo, la operación falla con la ruta/error antes de retirar el agente y el comando. Estos se retiran solo si coinciden con los archivos fuente (por hash); un archivo local modificado en esas rutas se conserva.
+
+Para comprobar la desinstalación en workspaces temporales sin conexión a DB2:
+
+```powershell
+& "$package\scripts\test-uninstall-analista-db2.ps1"
+```
 
 ## Configuración, comprobación y ejecución
 

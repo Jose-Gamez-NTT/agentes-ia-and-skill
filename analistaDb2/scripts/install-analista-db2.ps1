@@ -272,20 +272,20 @@ switch ($Action) {
         if (!(Test-Path -LiteralPath $workspaceRoot -PathType Container)) {
             throw "No existe el workspace: $workspaceRoot"
         }
-        Test-ActiveRuntimeProcess -Path $skillTarget
-        Remove-OwnedFile -Source $sourceAgent -Destination $agentTarget
-        Remove-OwnedFile -Source $sourceCommand -Destination $commandTarget
-        if (Test-Path -LiteralPath $skillTarget -PathType Container) {
+        if (Test-Path -LiteralPath $skillTarget) {
+            Test-ActiveRuntimeProcess -Path $skillTarget
             try {
                 Remove-Item -LiteralPath $skillTarget -Recurse -Force -ErrorAction Stop
             } catch {
                 throw "No se pudo eliminar por completo la skill y su runtime en '$skillTarget'. Detén cualquier proceso que use esos archivos y vuelve a ejecutar Uninstall. Error: $($_.Exception.Message)"
             }
-            if (Test-Path -LiteralPath $skillTarget) {
-                throw "La skill sigue presente en '$skillTarget'; la desinstalación quedó incompleta."
+            if ((Test-Path -LiteralPath $skillTarget) -or (Test-Path -LiteralPath $runtime)) {
+                throw "La skill o su runtime siguen presentes en '$skillTarget'; la desinstalación quedó incompleta."
             }
-            Write-Host "Eliminada la skill y todo su contenido local: $skillTarget"
+            Write-Host "Eliminada la skill y todo su contenido local, incluido el runtime: $skillTarget"
         }
+        Remove-OwnedFile -Source $sourceAgent -Destination $agentTarget
+        Remove-OwnedFile -Source $sourceCommand -Destination $commandTarget
         Remove-EmptyDirectories -Path (Split-Path -Parent $skillTarget)
         Remove-EmptyDirectories -Path (Split-Path -Parent $agentTarget)
         Remove-EmptyDirectories -Path (Split-Path -Parent $commandTarget)
