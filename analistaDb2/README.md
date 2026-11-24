@@ -27,13 +27,13 @@ El script copia el agente/skill/comando/runtime sin drivers, excluye configuraci
 
 El instalador no instala JDK/Maven ni descarga drivers: usa dependencias existentes y requiere que IBM DB2 JDBC se obtenga por un canal corporativo aprobado. No copies credenciales ni JAR a este repositorio.
 
-Para desinstalar los archivos distribuidos desde el mismo paquete, conservando `db2.properties`, drivers, logs y cualquier archivo editado localmente:
+Para desinstalar el agente, la skill, el comando y todo el runtime instalado en `.axet-code/skills/analista-db2`, incluidos `db2.properties`, drivers, logs, temporales, artefactos compilados y datos locales:
 
 ```powershell
 & "$package\scripts\install-analista-db2.ps1" -Action Uninstall -Workspace $workspace
 ```
 
-Antes de desinstalar, detén cualquier servidor activo con `Ctrl+C`. La desinstalación elimina solo archivos distribuidos cuyo hash coincide con la copia del paquete y limpia únicamente directorios que queden vacíos. Los archivos locales modificados o no verificables se preservan; también preserva configuración, drivers, logs, temporales y contenido ajeno al paquete. No desinstala Java/Maven. Ejecuta el script desde la misma versión del paquete utilizada para instalar, para que pueda verificar los hashes.
+La desinstalación elimina completa la carpeta de la skill instalada, incluidos archivos modificados o generados localmente; guarda antes cualquier configuración, driver o dato que quieras conservar. No elimina el paquete fuente ni desinstala Java/Maven. Comprueba procesos Java/Maven que usen esa carpeta y aborta si detecta alguno: detén el servidor con `Ctrl+C` y vuelve a ejecutar. Si Windows bloquea algún archivo, la operación falla con la ruta/error en vez de informar éxito. El agente y el comando se retiran solo si coinciden con los archivos fuente (por hash); un archivo local modificado en esas rutas se conserva.
 
 ## Configuración, comprobación y ejecución
 
