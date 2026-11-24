@@ -9,7 +9,7 @@ Invócala con `%analista-db2` o delega en el agente `analista-db2`. Para llamada
 ## Requisitos y seguridad
 
 - El runtime Java/Maven está incluido en el paquete y requiere JDK 11+, Maven 3.8+ y acceso a DB2. Sigue `runtime/db2-report-server/README.md` para crear la configuración local y arrancarlo.
-- La configuración con credenciales reales no se distribuye. El driver JDBC IBM no se redistribuye en el paquete; obtén los JARs por un canal aprobado e instálalos en `runtime/db2-report-server/Drivers_win/`.
+- La configuración con credenciales reales no se distribuye. Los JAR JDBC DB2 están en `runtime/db2-report-server/Drivers_win/`; su inclusión y redistribución deben ajustarse a la licencia IBM y a la política corporativa.
 - El servidor acepta únicamente un DSL JSON limitado, con parámetros vinculados, y aplica límites de filas/tiempo; revisa `references/query-json.md`.
 - Conserva una cuenta de DB2 de mínimo privilegio y solo lectura. Las comprobaciones del servidor no sustituyen los permisos de la base.
 - Confirma que el Connector no exponga SQL libre antes de usarlo para consultas de análisis.

@@ -23,9 +23,9 @@ $drivers = 'C:\ruta\aprobada\Drivers_win'
 & "$package\scripts\install-analista-db2.ps1" -Action Install -Workspace $workspace -DriversSource $drivers
 ```
 
-El script copia el agente/skill/comando/runtime sin drivers, excluye configuración, logs y artefactos temporales, crea `db2.properties` desde la plantilla solo si aún no existe, pregunta la ruta de drivers si no se pasó, copia solo los JAR y conserva la configuración y drivers preexistentes. Los archivos distribuidos modificados localmente también se conservan, en lugar de sobrescribirse. Después abre Notepad para completar credenciales en local y comprueba Java, Maven, la presencia de configuración/drivers y la exclusión de Git sin imprimir valores secretos. Si quedan requisitos pendientes, devuelve código de salida 2 y permite repetir la comprobación después de corregirlos. `-NoEditor` evita abrir Notepad; `-SkipMavenTests` omite las pruebas Maven durante la instalación.
+El script copia el agente/skill/comando/runtime, incluidos los JAR versionados de `Drivers_win/`; excluye configuración, logs y artefactos temporales. Crea `db2.properties` desde la plantilla solo si aún no existe, pregunta la ruta de drivers si no se pasó y copia JAR adicionales conservando la configuración y drivers preexistentes. Los archivos distribuidos modificados localmente también se conservan, en lugar de sobrescribirse. Después abre Notepad para completar credenciales en local y comprueba Java, Maven, la presencia de configuración/drivers y la exclusión de Git sin imprimir valores secretos. Si quedan requisitos pendientes, devuelve código de salida 2 y permite repetir la comprobación después de corregirlos. `-NoEditor` evita abrir Notepad; `-SkipMavenTests` omite las pruebas Maven durante la instalación.
 
-El instalador no instala JDK/Maven ni descarga drivers: usa dependencias existentes y requiere que IBM DB2 JDBC se obtenga por un canal corporativo aprobado. No copies credenciales ni JAR a este repositorio.
+El instalador no instala JDK/Maven ni descarga drivers: usa dependencias existentes. Los JAR DB2 versionados solo deben redistribuirse conforme a su licencia y a la política corporativa. No copies credenciales a este repositorio.
 
 Para desinstalar el agente, la skill, el comando y todo el runtime instalado en `.axet-code/skills/analista-db2`, incluidos `db2.properties`, drivers, logs, temporales, artefactos compilados y datos locales:
 
@@ -63,6 +63,6 @@ Descubre primero catálogo, tablas y columnas mediante consultas de solo lectura
 
 ## Seguridad y archivos locales
 
-`db2.properties`, `.env`, `Drivers_win/`, `target/` y logs están excluidos del paquete y del repositorio del proyecto. La configuración y los drivers en el workspace consumidor también deben quedar ignorados por Git; el script lo comprueba para `db2.properties`. No leas, compartas ni registres contraseñas, tokens, cadenas JDBC sensibles ni resultados con datos personales.
+`db2.properties`, `.env`, `target/` y logs están excluidos del paquete y del repositorio del proyecto. Los JAR DB2 de `Drivers_win/` están versionados y deben distribuirse solo conforme a la licencia aplicable. La configuración local en el workspace consumidor debe quedar ignorada por Git; el script lo comprueba para `db2.properties`. No leas, compartas ni registres contraseñas, tokens, cadenas JDBC sensibles ni resultados con datos personales.
 
 La configuración de ejemplo usa `db2.jdbcUrl=jdbc:db2://HOST:PORT/DATABASE`, `db2.user`, `db2.password`, `db2.driverDir=Drivers_win` y, opcionalmente, `db2.schema`. Se permite alternativamente especificar host, puerto y base como propiedades separadas. Mantén el driver JDBC compatible y autorizado.

@@ -7,7 +7,7 @@ Runtime local de solo lectura para consultar DB2 por JDBC. La presencia de este 
 - Windows con PowerShell 5.1+ o PowerShell 7+.
 - JDK 11+ y Maven 3.8+ disponibles en `PATH`.
 - Acceso de red/VPN a DB2 y cuenta con privilegios mínimos de solo lectura.
-- JAR del driver IBM DB2 JDBC autorizado para este entorno. No se incluyen ni descargan automáticamente por licencia.
+- JAR del driver IBM DB2 JDBC incluido en `Drivers_win/`; su redistribución debe ajustarse a la licencia IBM y a la política corporativa.
 
 ## Instalación guiada recomendada
 
@@ -20,7 +20,7 @@ $drivers = 'C:\ruta\aprobada\Drivers_win'
 & "$package\scripts\install-analista-db2.ps1" -Action Install -Workspace $workspace -DriversSource $drivers
 ```
 
-El instalador copia el runtime excluyendo drivers/configuración local, conserva ficheros locales existentes, crea `db2.properties` desde `db2.properties.example` si falta y copia los JAR autorizados a `.axet-code/skills/analista-db2/runtime/db2-report-server/Drivers_win/`. Abre el fichero con Notepad para la configuración local. No muestra ni solicita credenciales por chat. Si ya están instalados los archivos, usa el script del workspace:
+El instalador copia el runtime y los JAR versionados, excluyendo la configuración local, conserva ficheros locales existentes y crea `db2.properties` desde `db2.properties.example` si falta. Puede copiar JAR adicionales autorizados a `.axet-code/skills/analista-db2/runtime/db2-report-server/Drivers_win/`. Abre el fichero con Notepad para la configuración local. No muestra ni solicita credenciales por chat. Si ya están instalados los archivos, usa el script del workspace:
 
 ```powershell
 $script = '.\.axet-code\skills\analista-db2\scripts\db2-runtime.ps1'

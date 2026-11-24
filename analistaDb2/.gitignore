@@ -2,8 +2,6 @@ db2.properties
 *.properties
 .env
 **/.env
-Drivers_win/
-**/Drivers_win/
 target/
 **/target/
 node_modules/

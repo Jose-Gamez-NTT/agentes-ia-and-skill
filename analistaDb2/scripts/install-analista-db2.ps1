@@ -130,7 +130,7 @@ function Copy-OwnedFile([string]$Source, [string]$Destination) {
 }
 
 function Copy-SkillFiles([string]$Source, [string]$Destination) {
-    $excludedSegments = @('.git', '.axet-code', 'Drivers_win', 'target', 'node_modules', 'dist')
+    $excludedSegments = @('.git', '.axet-code', 'target', 'node_modules', 'dist')
     $sourceFull = [System.IO.Path]::GetFullPath($Source).TrimEnd([System.IO.Path]::DirectorySeparatorChar)
     New-Item -ItemType Directory -Force -Path $Destination | Out-Null
     foreach ($item in Get-ChildItem -LiteralPath $sourceFull -Force -Recurse) {
@@ -242,9 +242,9 @@ switch ($Action) {
                 foreach ($jar in $jars) {
                     Copy-Item -LiteralPath $jar.FullName -Destination (Join-Path $driverDir $jar.Name) -Force
                 }
-                Write-Host ("Copiados {0} JAR al runtime (excluidos de Git)." -f $jars.Count)
+                Write-Host ("Copiados {0} JAR al runtime local." -f $jars.Count)
             } else {
-                Write-Warning 'No se indicaron drivers. Puedes repetir Install con -DriversSource <carpeta>'.
+                Write-Warning 'No se indicaron drivers. Puedes repetir Install con -DriversSource <carpeta>.'
             }
         } else {
             Write-Host ("Ya hay {0} JAR en Drivers_win; no se sobrescribieron." -f $existingJars.Count)
