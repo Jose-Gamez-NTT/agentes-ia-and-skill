@@ -1,46 +1,68 @@
 # analistaDb2
 
-Paquete reutilizable de aXet.code para analizar necesidades de consulta DB2 con un agente especializado y una skill de apoyo. El agente y la skill no contienen credenciales ni implementan la conexión: requieren que el workspace tenga un connector aprobado que exponga las operaciones de consulta DB2.
-
-## ¿Agente, skill o ambos?
-
-Se incluyen **ambos**. El agente `analista-db2` aparece como especialista seleccionable y conserva el rol, los límites y el flujo de análisis. La skill `analista-db2` concentra las instrucciones reutilizables y la referencia DSL; también puede invocarse con `%analista-db2`. Mantenerlos separados facilita actualizar la guía sin duplicarla en el agente.
+Paquete reutilizable de aXet.code para analizar consultas DB2 de solo lectura. Incluye el agente `analista-db2`, la skill `analista-db2`, el runtime Java DB2 Report Server y un flujo guiado de instalación/configuración.
 
 ## Contenido
 
-- `agents/analista-db2.md`: definición del agente y enlace a su skill.
-- `skills/analista-db2/SKILL.md`: flujo de trabajo, reglas de uso y requisitos de conectividad.
-- `skills/analista-db2/references/query-json.md`: referencia del DSL JSON estructurado del servidor.
-- `skills/analista-db2/runtime/db2-report-server/`: servidor Java/Maven completo (código fuente, pruebas, recursos y plantilla); va dentro de la skill para instalarse junto con ella. Consulta su README para los pasos de instalación/arranque.
+- `agents/analista-db2.md`: agente especialista.
+- `commands/db2-configurar.md`: comando `/db2-configurar` para guiar la instalación y la conexión.
+- `scripts/install-analista-db2.ps1`: instala agente, skill, runtime y comando en un workspace; prepara el fichero local de configuración, copia drivers autorizados opcionalmente y verifica requisitos.
+- `skills/analista-db2/SKILL.md`: reglas de análisis, seguridad y operación.
+- `skills/analista-db2/scripts/db2-runtime.ps1`: configura, comprueba, prueba y arranca el runtime.
+- `skills/analista-db2/references/query-json.md`: DSL de solo lectura del servidor.
+- `skills/analista-db2/runtime/db2-report-server/`: servidor Java/Maven, pruebas y plantilla de configuración.
 
-## Requisito de conectividad
+## Instalación guiada en Windows
 
-Se distribuye el servidor Java/Maven de `conexionDB2` dentro de `skills/analista-db2/runtime/db2-report-server/`, con código fuente, pruebas, recursos y plantilla `db2.properties.example`; al instalar la skill se copia también el runtime. La configuración con contraseña no se incluye. El runtime requiere JDK, Maven, una cuenta DB2 y un driver JDBC IBM obtenido por un canal aprobado; el paquete no redistribuye JARs de IBM. Consulta `skills/analista-db2/runtime/db2-report-server/README.md` para instalar, configurar, arrancar, detener y mantenerlo.
-
-El adaptador MCP de origen (`conexionDB2/segundo`) ofrece `db2_preview` y `db2_query`, pero no está incluido ni se registra directamente como Connector de aXet.code: este producto usa Connectors propios. El runtime Java hace disponible el servicio HTTP local (`/query/preview` y `/query`), pero para que el agente llame DB2 desde aXet.code se necesita un Connector aprobado que alcance el servicio y exponga esas operaciones. Si todavía no existe, el runtime puede probarse localmente con PowerShell; el agente solo podrá preparar y revisar consultas, no invocar DB2.
-
-## Instalación en un workspace aXet.code
-
-Desde la raíz del workspace consumidor, ajusta `$agency` a la ruta de este paquete:
+Desde PowerShell en cualquier directorio, usando la ruta local de este paquete y la raíz del workspace consumidor:
 
 ```powershell
-$agency = "<ruta-del-repositorio>/analistaDb2"
-New-Item -ItemType Directory -Force .axet-code/agents, .axet-code/skills | Out-Null
-Copy-Item "$agency/agents/analista-db2.md" ".axet-code/agents/analista-db2.md"
-Copy-Item "$agency/skills/analista-db2" ".axet-code/skills/analista-db2" -Recurse -Force
+$package = 'C:\ruta\al\repositorio\analistaDb2'
+$workspace = 'C:\ruta\al\workspace'
+$drivers = 'C:\ruta\aprobada\Drivers_win'
+& "$package\scripts\install-analista-db2.ps1" -Action Install -Workspace $workspace -DriversSource $drivers
 ```
 
-Después inicia una nueva sesión si el agente o skill no aparecen. El agente se selecciona como `analista-db2`; la skill se puede invocar como `%analista-db2`.
+El script copia el agente/skill/comando/runtime sin drivers, excluye configuración, logs y artefactos temporales, crea `db2.properties` desde la plantilla solo si aún no existe, pregunta la ruta de drivers si no se pasó, copia solo los JAR y conserva la configuración y drivers preexistentes. Los archivos distribuidos modificados localmente también se conservan, en lugar de sobrescribirse. Después abre Notepad para completar credenciales en local y comprueba Java, Maven, la presencia de configuración/drivers y la exclusión de Git sin imprimir valores secretos. Si quedan requisitos pendientes, devuelve código de salida 2 y permite repetir la comprobación después de corregirlos. `-NoEditor` evita abrir Notepad; `-SkipMavenTests` omite las pruebas Maven durante la instalación.
 
-## Uso local y seguridad
+El instalador no instala JDK/Maven ni descarga drivers: usa dependencias existentes y requiere que IBM DB2 JDBC se obtenga por un canal corporativo aprobado. No copies credenciales ni JAR a este repositorio.
 
-- Sigue `skills/analista-db2/runtime/db2-report-server/README.md`; crea allí `db2.properties` desde la plantilla y comprueba que queda ignorado por Git. No copiar contraseñas, tokens ni `db2.properties` a este repositorio o a la conversación.
-- Arranca/paraliza el servidor local y ejecuta pruebas según esa guía. El binding por defecto es `localhost`; no expongas el endpoint sin un diseño aprobado de autenticación/autorización.
-- Mantener la cuenta DB2 con permisos mínimos de solo lectura; las protecciones del cliente no sustituyen permisos de base de datos.
-- Usar `db2_preview` antes de `db2_query` si el Connector ofrece ambas operaciones.
-- Empezar con límites bajos de filas/tiempo y seleccionar solo las columnas necesarias.
-- Ante ausencia de Connector, detenerse en el diseño/validación del DSL y explicar que no se pudo ejecutar.
+Para desinstalar los archivos distribuidos desde el mismo paquete, conservando `db2.properties`, drivers, logs y cualquier archivo editado localmente:
 
-## Evaluación del stack origen
+```powershell
+& "$package\scripts\install-analista-db2.ps1" -Action Uninstall -Workspace $workspace
+```
 
-La separación de responsabilidades es útil: el servidor Java implementa JDBC/DSL y el adapter MCP es una capa fina. El DSL parametriza valores y limita funciones, operadores y filas. Sin embargo, en el origen se encontró un `db2.properties` local con credenciales en texto claro; no se copiaron al paquete. Revisa su estado de versionado y rota la contraseña expuesta conforme al procedimiento corporativo. Consulta también el README del servidor origen para su modo de ejecución y sus límites.
+Antes de desinstalar, detén cualquier servidor activo con `Ctrl+C`. La desinstalación elimina solo archivos distribuidos cuyo hash coincide con la copia del paquete y limpia únicamente directorios que queden vacíos. Los archivos locales modificados o no verificables se preservan; también preserva configuración, drivers, logs, temporales y contenido ajeno al paquete. No desinstala Java/Maven. Ejecuta el script desde la misma versión del paquete utilizada para instalar, para que pueda verificar los hashes.
+
+## Configuración, comprobación y ejecución
+
+Después de instalar, desde la raíz del workspace:
+
+```powershell
+$runtime = '.\.axet-code\skills\analista-db2\scripts\db2-runtime.ps1'
+& $runtime -Action Check -Workspace (Get-Location).Path
+& $runtime -Action Start -Workspace (Get-Location).Path
+```
+
+`Start` queda en primer plano en esa terminal. En otra:
+
+```powershell
+& '.\.axet-code\skills\analista-db2\scripts\db2-runtime.ps1' -Action Test -Workspace (Get-Location).Path
+```
+
+`Test` ejecuta las pruebas Maven, consulta `/health` y realiza una única consulta de solo lectura a `SYSIBM.SYSDUMMY1`. Confirma conectividad básica, no permisos de negocio. El runtime enlaza a `localhost`; no lo expongas a redes ni añadas autenticación improvisada. Detén el servidor con `Ctrl+C`.
+
+También puedes usar el comando `/db2-configurar` dentro de aXet.code para recibir los pasos; debe iniciar una nueva sesión si agente, skill o comando todavía no aparecen. El comando guía al asistente, mientras que los scripts realizan las operaciones locales repetibles.
+
+## Conectividad con aXet.code y análisis
+
+El runtime por sí solo no añade una herramienta DB2 al agente. Las consultas automáticas requieren un Connector aprobado que alcance el runtime, o herramientas de sesión autorizadas que puedan acceder efectivamente a `localhost`. Si no existe ese acceso, el agente puede preparar DSL/comandos PowerShell y analizar resultados que el usuario haya ejecutado, pero no debe afirmar que consultó DB2.
+
+Descubre primero catálogo, tablas y columnas mediante consultas de solo lectura. Revisa `/query/preview` antes de `/query`, parametriza valores y limita columnas, filas y tiempo. La cuenta de DB2 debe tener permisos mínimos de solo lectura; las defensas del runtime no sustituyen privilegios de base de datos.
+
+## Seguridad y archivos locales
+
+`db2.properties`, `.env`, `Drivers_win/`, `target/` y logs están excluidos del paquete y del repositorio del proyecto. La configuración y los drivers en el workspace consumidor también deben quedar ignorados por Git; el script lo comprueba para `db2.properties`. No leas, compartas ni registres contraseñas, tokens, cadenas JDBC sensibles ni resultados con datos personales.
+
+La configuración de ejemplo usa `db2.jdbcUrl=jdbc:db2://HOST:PORT/DATABASE`, `db2.user`, `db2.password`, `db2.driverDir=Drivers_win` y, opcionalmente, `db2.schema`. Se permite alternativamente especificar host, puerto y base como propiedades separadas. Mantén el driver JDBC compatible y autorizado.

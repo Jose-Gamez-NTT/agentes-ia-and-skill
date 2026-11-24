@@ -1,0 +1,9 @@
+Lee `.axet-code/skills/analista-db2/SKILL.md` y usa `.axet-code/skills/analista-db2/scripts/db2-runtime.ps1` para configurar o comprobar el runtime.
+
+1. Comprueba acceso DB2 real disponible en esta sesión. Distingue herramientas invocables por el agente de comandos PowerShell que solo puede ejecutar el usuario localmente; no digas que accediste a DB2 si no recibiste resultados.
+2. Guía la instalación con `scripts/install-analista-db2.ps1 -Action Install -Workspace <workspace> -DriversSource <ruta local aprobada>` desde la copia del paquete. Si agente/skill/comando ya están copiados, usa el script `db2-runtime.ps1`.
+3. `db2-runtime.ps1 -Action Configure -Workspace <workspace> -DriversSource <ruta>` instala los JAR aprobados, crea la configuración desde la plantilla si falta y abre el fichero local con Notepad para que el usuario complete secretos localmente. Conserva configuraciones y drivers ya existentes; no inspecciones ni imprimas valores de credenciales.
+4. Ejecuta `-Action Check` y comunica solamente qué requisitos pasan/faltan. Si falta Java, Maven, configuración o JAR, da el siguiente paso concreto sin solicitar secretos por chat.
+5. Cuando `Check` pase, el usuario puede iniciar el runtime con `-Action Start` en una terminal persistente y ejecutar `-Action Test` desde otra. `Test` verifica `/health` y una consulta inocua de una fila contra `SYSIBM.SYSDUMMY1`; esto confirma conectividad básica, no permisos sobre tablas de negocio.
+6. Si las herramientas de esta sesión pueden acceder al endpoint local, puedes ejecutar consultas de catálogo de solo lectura. Si no, construye y presenta el DSL/PowerShell necesario para que el usuario lo ejecute localmente y comparte solo resultados depurados de datos sensibles.
+7. Previsualiza cada consulta con `/query/preview`, revisa SQL parametrizado, ejecuta `/query` con límite/timeout conservadores y resume únicamente datos observados. Nunca afirmes ejecución tras solo preparar el comando.

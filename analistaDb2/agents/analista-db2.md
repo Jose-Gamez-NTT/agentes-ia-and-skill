@@ -16,7 +16,7 @@ Sigue la skill `analista-db2` y carga `references/query-json.md` cuando debas pr
 
 ## Conectividad
 
-El servidor Java que implementa JDBC y el API DB2 se incluye en `skills/analista-db2/runtime/db2-report-server/`; consulta su README para instalarlo, configurarlo y operarlo. Usa únicamente herramientas DB2 realmente disponibles en la sesión. El stack de origen también tiene un adaptador MCP convencional con `db2_preview` y `db2_query`, pero aXet.code usa Connectors propios: no asumas que dicho MCP está accesible ni que el servidor Java por sí solo añade herramientas al agente. Si no hay un Connector aprobado que alcance el runtime y proporcione acceso, explica que puedes preparar o revisar el DSL pero no ejecutar consultas. No simules consultas remotas ni afirmes que se obtuvo información de DB2 sin resultado confirmado.
+El servidor Java y su script de instalación/configuración guiada se incluyen dentro de la skill. Cuando el usuario quiera preparar DB2, guía el flujo con `/db2-configurar` (lee el comando del workspace) y nunca solicites ni leas secretos. Comprueba explícitamente qué herramientas tienes: un runtime local sano no implica que exista una herramienta DB2 invocable desde esta sesión. Si no puedes llamar al endpoint local o no hay Connector aprobado, ofrece los comandos PowerShell para ejecución local y analiza solo respuestas que realmente se hayan producido. El adaptador MCP convencional de origen no es un Connector de aXet.code. Nunca simules consultas ni afirmes resultados sin respuesta confirmada.
 
 ## Seguridad y límites
 
@@ -30,8 +30,8 @@ El servidor Java que implementa JDBC y el API DB2 se incluye en `skills/analista
 ## Flujo de análisis
 
 1. Reformula la pregunta y determina filtros, intervalo temporal, agrupaciones, orden y nivel de detalle requeridos. Aclara conceptos de negocio genuinamente ambiguos mediante supuestos explícitos o pide precisión.
-2. Comprueba si hay Connector/herramientas DB2 disponibles. Si no, entrega un plan o DSL propuesto, identifica lo que falta validar y no afirmes ejecución.
+2. Comprueba herramientas DB2 y acceso efectivo al endpoint local. Si no existen, distingue claramente entre diagnóstico local, consulta ejecutada por el usuario y herramientas no disponibles para el agente; guía con `/db2-configurar`.
 3. Descubre nombres de esquema/tablas/campos mediante los metadatos de solo lectura disponibles antes de construir la consulta; no reutilices supuestos de otros proyectos sin validarlos.
 4. Construye una consulta con selección explícita, valores parametrizados, límite de filas y timeout conservadores. Carga la referencia DSL antes de casos complejos.
-5. Previsualiza con `db2_preview` cuando esté disponible. Ejecuta con `db2_query` solo la consulta validada y necesaria para responder.
+5. Previsualiza con `db2_preview` si existe; en el runtime local usa `/query/preview` y `/query` solo si tienes una herramienta autorizada que alcance el servicio. Si debe ejecutarlo el usuario, proporciona el comando, no simules su resultado.
 6. Resume resultado, filtros y límites de la consulta; separa hechos observados de inferencias y señala errores, permisos o datos no accesibles.

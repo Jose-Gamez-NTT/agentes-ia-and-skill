@@ -1,109 +1,85 @@
 # DB2 Report Server (Java)
 
-Runtime requerido para conectar con DB2 mediante JDBC. El agente y la skill usan este servidor como backend cuando se ejecuta junto a un adaptador/Connector compatible.
+Runtime local de solo lectura para consultar DB2 por JDBC. La presencia de este servidor no crea un Connector ni añade herramientas DB2 a aXet.code.
 
 ## Requisitos
 
-- JDK 11 o superior (el proyecto compila para Java 11).
-- Maven 3.8+ disponible en `PATH` (`mvn -v`).
-- Acceso de red al host DB2 y una cuenta DB2 con permisos mínimos de solo lectura.
-- Driver JDBC IBM DB2 autorizado para este entorno. Por licencia, este paquete no distribuye esos JAR; obténlos de un repositorio/instalador aprobado y colócalos en `Drivers_win/`.
+- Windows con PowerShell 5.1+ o PowerShell 7+.
+- JDK 11+ y Maven 3.8+ disponibles en `PATH`.
+- Acceso de red/VPN a DB2 y cuenta con privilegios mínimos de solo lectura.
+- JAR del driver IBM DB2 JDBC autorizado para este entorno. No se incluyen ni descargan automáticamente por licencia.
 
-## Instalación y configuración
+## Instalación guiada recomendada
 
-1. Copia el paquete completo de `analistaDb2/` a una ubicación local de trabajo. Al instalar la skill en un workspace, el runtime queda en `.axet-code/skills/analista-db2/runtime/db2-report-server/`. Copia esta carpeta a una ruta local de trabajo si la instalación de aXet.code está administrada o es de solo lectura; no ejecutes Maven dentro de una carpeta protegida.
-2. Abre PowerShell en el directorio de trabajo del runtime y obtén el driver IBM autorizado. Crea `Drivers_win/` si hace falta y coloca allí los JAR requeridos.
-3. Desde este directorio, crea la configuración local desde la plantilla:
-
-   ```powershell
-   Copy-Item db2.properties.example db2.properties
-   notepad db2.properties
-   ```
-
-4. Rellena `db2.jdbcUrl` (`jdbc:db2://HOST:PORT/DATABASE`), `db2.user` y `db2.password`. Conserva `db2.driverDir=Drivers_win`; opcionalmente define `db2.schema`. No uses ni copies credenciales de otro entorno. Guarda el fichero solo en el equipo autorizado y no lo añadas a Git, tickets ni conversaciones.
-5. Verifica que `db2.properties` está ignorado por Git (`git check-ignore db2.properties`). La plantilla y `.gitignore` del directorio protegen las configuraciones y drivers locales.
-6. Mantén permisos DB2 de solo lectura. `ReadOnlyJdbc` y el DSL restringido son defensas adicionales, no sustituyen la autorización de la base ni una revisión de seguridad corporativa.
-
-El fichero lee `db2.jdbcUrl` o construye la URL a partir de `db2.host`, `db2.port` y `db2.database`. No hay que configurar ambos formatos. Se pueden sobreescribir propiedades al arrancar con `-Ddb2.<propiedad>=...`, pero evita escribir contraseñas en comandos/shell history y prefiere el fichero local protegido.
-
-## Arranque y parada
-
-Desde este directorio, en PowerShell:
+Instala agente, skill, runtime y comando desde PowerShell:
 
 ```powershell
-mvn test
-mvn compile exec:java
+$package = 'C:\ruta\al\repositorio\analistaDb2'
+$workspace = (Get-Location).Path
+$drivers = 'C:\ruta\aprobada\Drivers_win'
+& "$package\scripts\install-analista-db2.ps1" -Action Install -Workspace $workspace -DriversSource $drivers
 ```
 
-El segundo comando queda en primer plano. Espera a que anuncie `http://localhost:8080`; para detenerlo usa `Ctrl+C`. El servidor se enlaza solo a `localhost`, adecuado para uso local. No lo expongas en interfaces/redes compartidas sin autenticación y autorización apropiadas.
-
-Para elegir otro puerto:
+El instalador copia el runtime excluyendo drivers/configuración local, conserva ficheros locales existentes, crea `db2.properties` desde `db2.properties.example` si falta y copia los JAR autorizados a `.axet-code/skills/analista-db2/runtime/db2-report-server/Drivers_win/`. Abre el fichero con Notepad para la configuración local. No muestra ni solicita credenciales por chat. Si ya están instalados los archivos, usa el script del workspace:
 
 ```powershell
-mvn "-Dserver.port=8081" compile exec:java
+$script = '.\.axet-code\skills\analista-db2\scripts\db2-runtime.ps1'
+& $script -Action Configure -Workspace (Get-Location).Path -DriversSource $drivers
+& $script -Action Check -Workspace (Get-Location).Path
 ```
 
-Comprueba disponibilidad local sin consultar datos:
+`Configure` conserva configuración y JAR existentes. También se puede invocar el comando aXet.code `/db2-configurar` para obtener guía interactiva. El comando instruye al agente; las operaciones del equipo se ejecutan con los scripts de PowerShell.
+
+## Configuración manual
+
+Si se requiere, desde el runtime de la instalación local copia la plantilla a `db2.properties` y edítala con un editor local. No pegues credenciales en comandos, Git, tickets ni chats. Configura `db2.jdbcUrl=jdbc:db2://HOST:PORT/DATABASE` (o `db2.host`, `db2.port`, `db2.database`), `db2.user`, `db2.password`; conserva `db2.driverDir=Drivers_win` y opcionalmente define `db2.schema`. Verifica localmente que `db2.properties` está ignorado por Git. La cuenta de base debe ser solo lectura.
+
+## Comprobar, iniciar y probar
+
+El script `db2-runtime.ps1` ofrece estas acciones:
+
+- `Check`: verifica Java/Maven, configuración y placeholders sin imprimir valores; cuenta JAR y revisa `git check-ignore`.
+- `Start`: ejecuta `mvn compile exec:java` en primer plano. Déjalo abierto en una terminal persistente.
+- `Test`: ejecuta `mvn test`, consulta `/health` y hace una consulta de una fila a `SYSIBM.SYSDUMMY1`. Debe ejecutarse en otra terminal mientras el servidor está activo.
 
 ```powershell
-Invoke-RestMethod -Method Get -Uri 'http://localhost:8080/health'
+$script = '.\.axet-code\skills\analista-db2\scripts\db2-runtime.ps1'
+& $script -Action Check -Workspace (Get-Location).Path
+& $script -Action Start -Workspace (Get-Location).Path
 ```
 
-Debe devolver `status: ok`. La verificación de salud no prueba las credenciales ni la conectividad DB2; una llamada a `/query` de lectura confirma ambas.
-
-## API de consultas
-
-- `POST /query/preview`: valida el DSL y devuelve el SQL/los parámetros compilados, sin conectarse a DB2.
-- `POST /query`: ejecuta el DSL contra DB2, devuelve columnas y filas, con `maxRows` por defecto 200 y máximo 1000; timeout por defecto 30s, máximo 120s.
-- `GET /health`: comprobación local del proceso.
-- `POST /generate`: compila y genera informes Jasper; necesita conexión DB2 y no es necesario para análisis tabular.
-
-El API no admite SQL libre. Solo ejecuta consultas del DSL documentado en `../../references/query-json.md`. Mantén parámetros dinámicos en `params`, previsualiza primero y limita filas/tiempo.
-
-Ejemplo en PowerShell (guarda el body en un archivo JSON no sensible y usa los nombres de esquema/campos ya verificados):
+En una segunda terminal:
 
 ```powershell
-$body = @'
-{
-  "query": {
-    "select": [{ "column": "t.CODIGO" }],
-    "from": { "schema": "ESQUEMA", "table": "TABLA", "alias": "t" },
-    "limit": 20
-  },
-  "maxRows": 20,
-  "timeoutSeconds": 15
-}
-'@
-Invoke-RestMethod -Method Post -Uri 'http://localhost:8080/query/preview' -ContentType 'application/json' -Body $body
-Invoke-RestMethod -Method Post -Uri 'http://localhost:8080/query' -ContentType 'application/json' -Body $body
+& '.\.axet-code\skills\analista-db2\scripts\db2-runtime.ps1' -Action Test -Workspace (Get-Location).Path
 ```
 
-No uses identificadores ficticios en una consulta real: primero descubre tablas/columnas con las herramientas de catálogo aprobadas. Al integrar con un cliente/Connector, este debe llamar al preview y query del servidor con su contrato compatible.
+La prueba confirma conectividad básica de lectura, no autorización sobre las tablas funcionales. Para detenerlo, pulsa `Ctrl+C`. El servidor solo se enlaza a `localhost`; no lo publiques en interfaces/redes compartidas.
 
-## Adaptador MCP de origen
+## API y análisis
 
-En `conexionDB2/segundo` existe un adaptador MCP convencional Node.js con herramientas `db2_preview` y `db2_query`; no se incluye en este runtime Java. No se conecta automáticamente a aXet.code, cuyo mecanismo de integración son Connectors. Para aXet.code se necesita un Connector aprobado que alcance este servidor y exponga esas operaciones de forma segura. No registres el adaptador MCP como si fuera directamente un Connector ni publiques el servicio HTTP a la red para sortear esa integración.
+- `GET /health`: estado del proceso local; no prueba credenciales.
+- `POST /query/preview`: valida el DSL, compila y devuelve SQL/parametrización sin conectar a DB2.
+- `POST /query`: ejecuta el DSL JSON restringido, solo de lectura; máximo 1000 filas y 120 s.
+- `POST /generate`: genera informes Jasper; no es necesario para análisis tabular.
 
-## Desarrollo y mantenimiento
+Consulta `../../references/query-json.md` para el DSL. Nunca envíes SQL libre; parametriza valores, usa columnas explícitas y límites bajos. Previsualiza antes de ejecutar.
 
-- Ejecuta `mvn test` después de cambiar Java o el DSL.
-- Mantén las versiones Maven y el driver JDBC compatibles y aprobadas por NTT DATA, Inc.; no actualices drivers/JAR sin revisar licencias y compatibilidad DB2.
-- Cambios al contrato HTTP/DSL deben reflejarse en `references/query-json.md` y en las instrucciones de la skill.
-- Nunca guardes logs con credenciales, cadenas de conexión con datos sensibles o filas de clientes; los logs de errores deben revisarse antes de compartirlos.
-- La operación de `/generate` permite una modalidad con rutas locales JRXML. Úsala solo con archivos controlados y acceso local de confianza; el servidor es HTTP local sin autenticación.
+La capacidad del agente para enviar solicitudes a `localhost` depende de las herramientas disponibles en la sesión: una sesión remota/sandbox puede no ver el servicio local del usuario. Si no hay Connector aprobado ni herramienta con acceso local efectivo, ejecuta el comando desde PowerShell y comparte solo resultados no sensibles; no afirmes consultas que no se ejecutaron.
 
 ## Resolución de problemas
 
-| Síntoma | Revisión |
+| Síntoma | Qué comprobar |
 |---|---|
-| `mvn` o `java` no encontrado | Instala JDK/Maven aprobados y verifica `PATH` con `java -version` y `mvn -v`. |
-| Falla de driver/clase JDBC | Comprueba que `Drivers_win/` existe, contiene JAR IBM DB2 compatibles y `db2.driverClass` sea `com.ibm.db2.jcc.DB2Driver`. |
-| `/health` funciona pero `/query` da error de conexión | Revisa host/puerto/base, VPN/ruta/firewall, disponibilidad DB2 y permisos de red. No imprimas la contraseña al depurar. |
-| Error de autenticación DB2 | Reescribe las credenciales localmente mediante el procedimiento autorizado; no las envíes por chat ni las pongas en argumentos visibles. |
-| `/query/preview` responde error | Valida JSON, identificadores, operadores y estructura en la referencia DSL. Preview no requiere conexión DB2. |
-| Puerto en uso | Arranca con `-Dserver.port=<puerto>` y actualiza la URL que use el Connector. |
-| Cliente no puede acceder | Comprueba que el cliente se ejecuta en la misma máquina y apunta a `localhost`; no expongas el server a la red sin un diseño de autenticación/aprobación. |
+| Java/Maven no encontrados | Instala versiones aprobadas, actualiza `PATH`, abre una terminal nueva y ejecuta `java -version`, `mvn -v`. |
+| Configuración falta o tiene placeholders | Ejecuta `-Action Configure`; edita `db2.properties` localmente y luego `-Action Check`. El script nunca imprime sus valores. |
+| Cero JAR detectados | Confirma JAR JDBC IBM aprobados en la carpeta indicada por `db2.driverDir`; no descargues/copias desde fuentes no aprobadas. |
+| `/health` no responde | Comprueba que `-Action Start` permanece activo y que `BaseUrl`/puerto coinciden. |
+| `/health` funciona, `/query` falla | `/health` no se conecta a DB2. Revisa VPN/ruta/firewall, URL/base, permisos y error JDBC; no imprimas la contraseña. |
+| Error de autenticación | Revisa/actualiza la configuración local mediante el canal autorizado; nunca compartas credenciales por chat. |
+| `SQLCODE=-204` para catálogo | No asumas que `SYSCAT`/`QSYS2` existe. Confirma la plataforma/versión DB2 y los catálogos disponibles antes de elegir tablas de metadatos. |
+| No se puede conectar al endpoint desde el asistente | Es limitación de herramienta/sesión. Ejecuta las llamadas en el equipo que ve `localhost`, o habilita Connector aprobado; no expongas el servidor a la red para evitarlo. |
 
-## Distribución y licencias
+## Seguridad
 
-El código fuente, `pom.xml`, pruebas y recursos de este directorio forman parte del paquete `analistaDb2`. La configuración real, artefactos `target/`, logs y credenciales se excluyen. Los JAR del driver DB2 se excluyen por ser dependencias de terceros. Deben obtenerse por un canal autorizado; sin ellos no será posible conectarse.
+Los drivers y ficheros locales (`db2.properties`, `Drivers_win/`, `target/`, logs) no deben subirse al repositorio. El servidor no tiene autenticación HTTP y está pensado para localhost; no lo expongas a terceros. Las barreras del DSL y JDBC son defensa adicional, no sustituyen los permisos DB2 de mínimo privilegio.
