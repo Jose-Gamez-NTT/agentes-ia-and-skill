@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Mapeo de nombres de fuente lógicos Java → DejaVu TTF (incluidos en jasperreports-fonts).
+    JasperReports carga este fichero a través de jasperreports_extension.properties.
+
+    Sin este mapeo, SansSerif/Serif/Monospaced se exportan a PDF como Helvetica/Times/Courier
+    Type1 sin embedding: el PDF puede no mostrar negritas/cursivas y perder caracteres
+    especiales (ñ, á, etc.) en entornos sin fuentes externas.
+
+    DejaVu es Unicode completo y de licencia libre (BitStream Vera / SIL Open Font).
+-->
+<fontFamilies>
+
+    <!-- Java logical: SansSerif → DejaVu Sans (4 variantes) -->
+    <fontFamily name="SansSerif">
+        <normal>net/sf/jasperreports/fonts/dejavu/DejaVuSans.ttf</normal>
+        <bold>net/sf/jasperreports/fonts/dejavu/DejaVuSans-Bold.ttf</bold>
+        <italic>net/sf/jasperreports/fonts/dejavu/DejaVuSans-Oblique.ttf</italic>
+        <boldItalic>net/sf/jasperreports/fonts/dejavu/DejaVuSans-BoldOblique.ttf</boldItalic>
+        <pdfEncoding>Identity-H</pdfEncoding>
+        <pdfEmbedded>true</pdfEmbedded>
+    </fontFamily>
+
+    <!-- Java logical: Serif → DejaVu Serif -->
+    <fontFamily name="Serif">
+        <normal>net/sf/jasperreports/fonts/dejavu/DejaVuSerif.ttf</normal>
+        <bold>net/sf/jasperreports/fonts/dejavu/DejaVuSerif-Bold.ttf</bold>
+        <italic>net/sf/jasperreports/fonts/dejavu/DejaVuSerif-Italic.ttf</italic>
+        <boldItalic>net/sf/jasperreports/fonts/dejavu/DejaVuSerif-BoldItalic.ttf</boldItalic>
+        <pdfEncoding>Identity-H</pdfEncoding>
+        <pdfEmbedded>true</pdfEmbedded>
+    </fontFamily>
+
+    <!-- Java logical: Monospaced → DejaVu Sans Mono -->
+    <fontFamily name="Monospaced">
+        <normal>net/sf/jasperreports/fonts/dejavu/DejaVuSansMono.ttf</normal>
+        <bold>net/sf/jasperreports/fonts/dejavu/DejaVuSansMono-Bold.ttf</bold>
+        <italic>net/sf/jasperreports/fonts/dejavu/DejaVuSansMono-Oblique.ttf</italic>
+        <boldItalic>net/sf/jasperreports/fonts/dejavu/DejaVuSansMono-BoldOblique.ttf</boldItalic>
+        <pdfEncoding>Identity-H</pdfEncoding>
+        <pdfEmbedded>true</pdfEmbedded>
+    </fontFamily>
+
+    <!-- Arial → DejaVu Sans (sustitución sin necesitar fuentes del SO) -->
+    <fontFamily name="Arial">
+        <normal>net/sf/jasperreports/fonts/dejavu/DejaVuSans.ttf</normal>
+        <bold>net/sf/jasperreports/fonts/dejavu/DejaVuSans-Bold.ttf</bold>
+        <italic>net/sf/jasperreports/fonts/dejavu/DejaVuSans-Oblique.ttf</italic>
+        <boldItalic>net/sf/jasperreports/fonts/dejavu/DejaVuSans-BoldOblique.ttf</boldItalic>
+        <pdfEncoding>Identity-H</pdfEncoding>
+        <pdfEmbedded>true</pdfEmbedded>
+    </fontFamily>
+
+    <!-- Times New Roman → DejaVu Serif -->
+    <fontFamily name="Times New Roman">
+        <normal>net/sf/jasperreports/fonts/dejavu/DejaVuSerif.ttf</normal>
+        <bold>net/sf/jasperreports/fonts/dejavu/DejaVuSerif-Bold.ttf</bold>
+        <italic>net/sf/jasperreports/fonts/dejavu/DejaVuSerif-Italic.ttf</italic>
+        <boldItalic>net/sf/jasperreports/fonts/dejavu/DejaVuSerif-BoldItalic.ttf</boldItalic>
+        <pdfEncoding>Identity-H</pdfEncoding>
+        <pdfEmbedded>true</pdfEmbedded>
+    </fontFamily>
+
+    <!-- Courier New → DejaVu Sans Mono -->
+    <fontFamily name="Courier New">
+        <normal>net/sf/jasperreports/fonts/dejavu/DejaVuSansMono.ttf</normal>
+        <bold>net/sf/jasperreports/fonts/dejavu/DejaVuSansMono-Bold.ttf</bold>
+        <italic>net/sf/jasperreports/fonts/dejavu/DejaVuSansMono-Oblique.ttf</italic>
+        <boldItalic>net/sf/jasperreports/fonts/dejavu/DejaVuSansMono-BoldOblique.ttf</boldItalic>
+        <pdfEncoding>Identity-H</pdfEncoding>
+        <pdfEmbedded>true</pdfEmbedded>
+    </fontFamily>
+
+</fontFamilies>

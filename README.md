@@ -7,14 +7,19 @@ Repositorio Git independiente para organizar agencias reutilizables. Cada agenci
 | Agencia | Descripción | Guía |
 |---|---|---|
 | **Agencia CICD** | Especialista en Azure DevOps: pull requests, pipelines, despliegues y Libraries/Variable Groups. | [README de Agencia CICD](Agencia%20CICD/README.md) |
+| **analistaDb2** | Agente y skill para analizar consultas DB2 mediante el stack de solo lectura existente. | [README de analistaDb2](analistaDb2/README.md) |
 
 ## Estructura
 
 ```text
 Agentes y otros/
-├── README.md              # Índice de agencias
+├── README.md
+├── analistaDb2/
+│   ├── README.md
+│   ├── agents/
+│   └── skills/
 └── Agencia CICD/
-    ├── README.md          # Instalación y uso de esta agencia
+    ├── README.md
     ├── agents/
     ├── commands/
     └── skills/

@@ -5,3 +5,5 @@
 **/ado-projects.local.json
 **/backups/
 **/libraries/
+.graphify/
+.graphifyignore

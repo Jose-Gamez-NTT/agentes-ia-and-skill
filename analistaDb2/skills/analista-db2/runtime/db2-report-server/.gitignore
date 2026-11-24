@@ -1,0 +1,5 @@
+db2.properties
+*.properties
+Drivers_win/
+target/
+*.log

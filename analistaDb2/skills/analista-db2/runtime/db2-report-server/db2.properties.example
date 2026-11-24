@@ -1,0 +1,6 @@
+db2.driverClass=com.ibm.db2.jcc.DB2Driver
+db2.jdbcUrl=jdbc:db2://<HOST>:<PORT>/<DATABASE>
+db2.user=<DB2_USER>
+db2.password=<DB2_PASSWORD>
+db2.driverDir=Drivers_win
+# db2.schema=<DB2_SCHEMA>
